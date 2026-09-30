@@ -1,0 +1,2914 @@
+DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>EduPredict AI — Academic Performance System</title>
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Chart.js & jsPDF Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- =========================================================
+       NOTIFICATION SYSTEM STYLES
+       ========================================================= -->
+
+  <style>
+
+    /* Notification button */
+    #notif-btn {
+      position: relative;
+      cursor: pointer;
+    }
+
+    /* Notification count */
+    #notif-btn .notif-dot {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+
+      min-width: 18px;
+      height: 18px;
+
+      padding: 0 5px;
+
+      border-radius: 999px;
+
+      background: #ef4444;
+      color: white;
+
+      font-size: 10px;
+      font-weight: 800;
+
+      display: none;
+
+      align-items: center;
+      justify-content: center;
+
+      border: 2px solid var(--bg-main, #0f172a);
+
+      z-index: 10;
+    }
+
+
+    /* Notification overlay */
+    #notif-overlay {
+      position: fixed;
+
+      inset: 0;
+
+      background: rgba(2, 6, 23, 0.35);
+
+      z-index: 99998;
+
+      display: none;
+
+      backdrop-filter: blur(2px);
+    }
+
+
+    /* Notification panel */
+    #notif-panel {
+      position: fixed;
+
+      top: 75px;
+      right: 25px;
+
+      width: 400px;
+      max-width: calc(100vw - 30px);
+
+      max-height: calc(100vh - 100px);
+
+      overflow: hidden;
+
+      background: var(--bg-card, #111827);
+
+      border: 1px solid rgba(148, 163, 184, 0.25);
+
+      border-radius: 18px;
+
+      box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.45);
+
+      z-index: 99999;
+
+      display: none;
+    }
+
+
+    /* Header */
+    #notif-panel .notif-panel-header {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      gap: 10px;
+
+      padding: 18px 20px;
+
+      border-bottom:
+        1px solid rgba(148, 163, 184, 0.18);
+
+    }
+
+
+    .notif-panel-title {
+
+      font-size: 15px;
+
+      font-weight: 800;
+
+      color: var(--text-main, #f8fafc);
+    }
+
+
+    .notif-mark-read {
+
+      border: none;
+
+      background: transparent;
+
+      color: #818cf8;
+
+      font-size: 11px;
+
+      font-weight: 700;
+
+      cursor: pointer;
+
+      padding: 5px;
+    }
+
+
+    .notif-mark-read:hover {
+
+      color: #a5b4fc;
+
+      text-decoration: underline;
+    }
+
+
+    /* Notification list */
+    #notif-list {
+
+      max-height: calc(100vh - 175px);
+
+      overflow-y: auto;
+
+      scrollbar-width: thin;
+    }
+
+
+    /* Individual notification */
+    .edupredict-notification {
+
+      display: flex;
+
+      gap: 12px;
+
+      align-items: flex-start;
+
+      padding: 16px 18px;
+
+      border-bottom:
+        1px solid rgba(148, 163, 184, 0.12);
+
+      transition:
+        background 0.2s ease,
+        transform 0.15s ease;
+    }
+
+
+    .edupredict-notification:hover {
+
+      background:
+        rgba(99, 102, 241, 0.08);
+
+    }
+
+
+    .edupredict-notification.unread {
+
+      background:
+        rgba(99, 102, 241, 0.10);
+    }
+
+
+    .notification-icon {
+
+      width: 40px;
+
+      height: 40px;
+
+      min-width: 40px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      border-radius: 12px;
+
+      background:
+        rgba(99, 102, 241, 0.12);
+
+      font-size: 19px;
+    }
+
+
+    .notification-content {
+
+      flex: 1;
+
+      min-width: 0;
+    }
+
+
+    .notification-title-row {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      gap: 10px;
+    }
+
+
+    .notification-title {
+
+      font-size: 13px;
+
+      font-weight: 800;
+
+      color:
+        var(--text-main, #f8fafc);
+    }
+
+
+    .notification-message {
+
+      margin: 6px 0 0;
+
+      font-size: 12px;
+
+      line-height: 1.55;
+
+      color:
+        var(--text-3, #94a3b8);
+    }
+
+
+    .notification-new {
+
+      display: inline-block;
+
+      margin-top: 7px;
+
+      color: #818cf8;
+
+      font-size: 9px;
+
+      font-weight: 800;
+
+      letter-spacing: 0.08em;
+    }
+
+
+    .notification-unread-dot {
+
+      width: 8px;
+
+      height: 8px;
+
+      min-width: 8px;
+
+      border-radius: 50%;
+
+      background: #6366f1;
+
+      display: inline-block;
+    }
+
+
+    /* Mobile */
+    @media (max-width: 600px) {
+
+      #notif-panel {
+
+        top: 65px;
+
+        right: 10px;
+
+        width:
+          calc(100vw - 20px);
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <!-- =========================================================
+       SIDEBAR NAVIGATION
+       ========================================================= -->
+
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-logo">
+
+      <span class="logo-text">
+        EduPredict
+        <span class="logo-ai">AI</span>
+      </span>
+
+    </div>
+
+
+    <nav class="sidebar-nav">
+
+      <div class="nav-section-label">
+        MAIN MENU
+      </div>
+
+
+      <a href="#" class="nav-item active" data-page="dashboard">
+
+        <svg
+          class="nav-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+          />
+        </svg>
+
+        Dashboard
+
+      </a>
+
+
+      <a href="#" class="nav-item" data-page="students">
+
+        <svg
+          class="nav-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+          />
+        </svg>
+
+        Student Roster
+
+      </a>
+
+
+      <a href="#" class="nav-item" data-page="reports">
+
+        <svg
+          class="nav-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+
+        Reports & Audits
+
+      </a>
+
+
+      <div class="nav-section-label">
+        CONFIGURATION
+      </div>
+
+
+      <a href="#" class="nav-item" data-page="settings">
+
+        <svg
+          class="nav-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10.325 4.317a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543-.826-3.31-2.37-2.37-.996.608-2.296.07-2.572-1.065z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+
+        Settings
+
+      </a>
+
+    </nav>
+
+
+    <div class="sidebar-profile">
+
+      <div class="profile-avatar">
+        ST
+      </div>
+
+      <div class="profile-info">
+
+        <div class="profile-name">
+          Student Profile
+        </div>
+
+        <div class="profile-role">
+          Student • CS-A
+        </div>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =========================================================
+       MAIN CONTENT
+       ========================================================= -->
+
+  <main class="main-content" id="main-content">
+
+
+    <!-- =======================================================
+         TOPBAR
+         ======================================================= -->
+
+    <header class="topbar">
+
+      <div class="topbar-left">
+
+        <div class="topbar-breadcrumb">
+
+          <span class="breadcrumb-root">
+            EduPredict
+          </span>
+
+          /
+
+          <span
+            class="breadcrumb-current"
+            id="breadcrumb-current"
+          >
+            Dashboard
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="topbar-right">
+
+
+        <!-- STUDENT SELECT -->
+
+        <select
+          id="student-select"
+          class="select-input"
+        >
+
+          <option value="1">
+            Loading roster...
+          </option>
+
+        </select>
+
+
+        <!-- SEARCH -->
+
+        <div class="topbar-search">
+
+          <svg
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+
+          </svg>
+
+          <input
+            type="text"
+            placeholder="Search student by name, roll no..."
+          >
+
+        </div>
+
+
+        <!-- DARK MODE -->
+
+        <button
+          class="topbar-btn"
+          id="dark-mode-toggle"
+          title="Toggle Theme"
+        >
+
+          <svg
+            class="icon-sun"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            />
+
+          </svg>
+
+
+          <svg
+            class="icon-moon"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+            />
+
+          </svg>
+
+        </button>
+
+
+        <!-- =================================================
+             NOTIFICATION BUTTON
+             ================================================= -->
+
+        <button
+          class="topbar-btn"
+          id="notif-btn"
+          title="Notifications"
+          type="button"
+        >
+
+          <svg
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+            />
+
+          </svg>
+
+
+          <span
+            class="notif-dot"
+            style="display:none;"
+          >
+            7
+          </span>
+
+        </button>
+
+
+        <!-- PROFILE -->
+
+        <div class="topbar-avatar profile-avatar">
+          ST
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- =======================================================
+         NOTIFICATION OVERLAY
+         ======================================================= -->
+
+    <div
+      class="notif-overlay"
+      id="notif-overlay"
+    >
+    </div>
+
+
+    <!-- =======================================================
+         NOTIFICATION PANEL
+         ======================================================= -->
+
+    <div
+      class="notif-panel"
+      id="notif-panel"
+    >
+
+      <div class="notif-panel-header">
+
+        <span class="notif-panel-title">
+          🔔 System Notifications
+        </span>
+
+        <button
+          class="notif-mark-read"
+          id="mark-all-read"
+          type="button"
+        >
+          Mark all as read
+        </button>
+
+      </div>
+
+
+      <div
+        class="notif-list"
+        id="notif-list"
+      >
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         PAGE 1 — DASHBOARD
+         ======================================================= -->
+
+    <div
+      class="page active"
+      id="page-dashboard"
+    >
+
+
+      <div class="page-header">
+
+        <div>
+
+          <h1 class="page-title">
+            Academic Analytics Dashboard
+          </h1>
+
+          <p class="page-subtitle">
+            Real-time performance predictions and personalized intervention planning
+          </p>
+
+        </div>
+
+
+        <div class="page-header-actions">
+
+          <button
+            class="btn-primary"
+            id="export-report-btn"
+          >
+
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+
+            </svg>
+
+            Export PDF Report
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- FEATURED CARDS -->
+
+      <div class="two-col-grid">
+
+
+        <div
+          class="prediction-result-card"
+          style="
+            background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+            border-radius:20px;
+            padding:28px;
+            min-height:220px;
+            display:flex;
+            flex-direction:column;
+            justify-content:space-between;
+          "
+        >
+
+          <div>
+
+            <div
+              class="pred-label"
+              style="
+                opacity:.85;
+                font-size:11px;
+                font-weight:700;
+                letter-spacing:.1em;
+              "
+            >
+              AI PREDICTED ACADEMIC SCORE
+            </div>
+
+
+            <div
+              class="pred-score"
+              id="kpi-predicted"
+              style="
+                font-size:48px;
+                font-weight:900;
+                margin:8px 0;
+              "
+            >
+              --%
+            </div>
+
+
+            <div
+              class="pred-grade"
+              id="kpi-grade"
+              style="
+                font-size:15px;
+                font-weight:700;
+              "
+            >
+              Grade: --
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <div
+              style="
+                font-size:12px;
+                opacity:.9;
+                margin-bottom:6px;
+                display:flex;
+                justify-content:space-between;
+              "
+            >
+
+              <span>
+                Target Target Standing
+              </span>
+
+              <span
+                id="risk-badge"
+                class="badge badge-green"
+              >
+                Low Risk
+              </span>
+
+            </div>
+
+
+            <div class="pred-bar-wrap">
+
+              <div
+                class="pred-bar-fill"
+                id="pred-bar"
+                style="width:0%;"
+              >
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="prediction-result-card"
+          style="
+            background:linear-gradient(135deg,#7C3AED 0%,#4F46E5 100%);
+            border-radius:20px;
+            padding:28px;
+            min-height:220px;
+            display:flex;
+            flex-direction:column;
+            justify-content:space-between;
+          "
+        >
+
+          <div>
+
+            <div
+              class="pred-label"
+              style="
+                opacity:.85;
+                font-size:11px;
+                font-weight:700;
+                letter-spacing:.1em;
+              "
+            >
+              OVERALL CLASS PERFORMANCE
+            </div>
+
+
+            <div
+              class="pred-score"
+              id="kpi-performance"
+              style="
+                font-size:48px;
+                font-weight:900;
+                margin:8px 0;
+              "
+            >
+              --%
+            </div>
+
+
+            <div
+              class="pred-grade"
+              style="
+                font-size:13px;
+                opacity:.9;
+              "
+            >
+
+              Attendance Average:
+
+              <strong id="kpi-attendance">
+                --%
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="
+              display:flex;
+              gap:10px;
+            "
+          >
+
+            <div
+              class="insight-chip"
+              style="
+                flex:1;
+                background:rgba(255,255,255,.12);
+                border:none;
+                padding:10px;
+                border-radius:12px;
+              "
+            >
+
+              <div
+                class="insight-chip-label"
+                style="
+                  color:rgba(255,255,255,.8);
+                  font-size:10px;
+                "
+              >
+                Model Precision
+              </div>
+
+              <div
+                class="insight-chip-val"
+                style="
+                  color:white;
+                  font-size:16px;
+                "
+              >
+                94.2%
+              </div>
+
+            </div>
+
+
+            <div
+              class="insight-chip"
+              style="
+                flex:1;
+                background:rgba(255,255,255,.12);
+                border:none;
+                padding:10px;
+                border-radius:12px;
+              "
+            >
+
+              <div
+                class="insight-chip-label"
+                style="
+                  color:rgba(255,255,255,.8);
+                  font-size:10px;
+                "
+              >
+                Status
+              </div>
+
+              <div
+                class="insight-chip-val"
+                style="
+                  color:white;
+                  font-size:16px;
+                "
+              >
+                Optimal
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- CHARTS -->
+
+      <div class="two-col-grid">
+
+        <div class="card">
+
+          <div class="card-header">
+
+            <h3 class="card-title">
+              Performance Trend Projection
+            </h3>
+
+          </div>
+
+          <div
+            class="chart-container"
+            style="height:250px;"
+          >
+
+            <canvas
+              id="performance-trend-chart"
+            >
+            </canvas>
+
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-header">
+
+            <h3 class="card-title">
+              Subject Proficiency Radar
+            </h3>
+
+          </div>
+
+          <div
+            class="chart-container"
+            style="height:250px;"
+          >
+
+            <canvas
+              id="subject-radar-chart"
+            >
+            </canvas>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- MONTHLY + RISK -->
+
+      <div class="two-col-grid">
+
+        <div class="card">
+
+          <div class="card-header">
+
+            <h3 class="card-title">
+              Monthly Breakdown
+            </h3>
+
+          </div>
+
+          <div
+            class="chart-container"
+            style="height:240px;"
+          >
+
+            <canvas
+              id="monthly-breakdown-chart"
+            >
+            </canvas>
+
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-header">
+
+            <h3 class="card-title">
+              Risk Factor Evaluation
+            </h3>
+
+          </div>
+
+
+          <div class="risk-factors">
+
+
+            <div class="risk-factor-item">
+
+              <div class="rfi-label">
+
+                <span class="rfi-dot green"></span>
+
+                Attendance
+
+              </div>
+
+              <div class="rfi-bar-wrap">
+
+                <div
+                  class="rfi-bar bar-green"
+                  id="risk-att-bar"
+                >
+                </div>
+
+              </div>
+
+              <div
+                class="rfi-val"
+                id="risk-att-val"
+              >
+                0%
+              </div>
+
+            </div>
+
+
+            <div class="risk-factor-item">
+
+              <div class="rfi-label">
+
+                <span class="rfi-dot blue"></span>
+
+                Assignments
+
+              </div>
+
+              <div class="rfi-bar-wrap">
+
+                <div
+                  class="rfi-bar bar-blue"
+                  id="risk-assign-bar"
+                >
+                </div>
+
+              </div>
+
+              <div
+                class="rfi-val"
+                id="risk-assign-val"
+              >
+                0%
+              </div>
+
+            </div>
+
+
+            <div class="risk-factor-item">
+
+              <div class="rfi-label">
+
+                <span class="rfi-dot orange"></span>
+
+                Test Score
+
+              </div>
+
+              <div class="rfi-bar-wrap">
+
+                <div
+                  class="rfi-bar bar-orange"
+                  id="risk-test-bar"
+                >
+                </div>
+
+              </div>
+
+              <div
+                class="rfi-val"
+                id="risk-test-val"
+              >
+                0%
+              </div>
+
+            </div>
+
+
+            <div class="risk-factor-item">
+
+              <div class="rfi-label">
+
+                <span class="rfi-dot red"></span>
+
+                Study Hours
+
+              </div>
+
+              <div class="rfi-bar-wrap">
+
+                <div
+                  class="rfi-bar bar-purple"
+                  id="risk-study-bar"
+                >
+                </div>
+
+              </div>
+
+              <div
+                class="rfi-val"
+                id="risk-study-val"
+              >
+                0%
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- WHAT IF -->
+
+      <div class="two-col-grid">
+
+        <div class="card">
+
+          <div class="card-header">
+
+            <h3 class="card-title">
+              Interactive What-If Simulator
+            </h3>
+
+          </div>
+
+
+          <div class="slider-group">
+
+
+            <div class="slider-row">
+
+              <label>
+
+                Daily Study Hours
+
+                <span
+                  class="slider-val"
+                  id="study-val"
+                >
+                  0h
+                </span>
+
+              </label>
+
+              <input
+                type="range"
+                class="slider"
+                id="study-slider"
+                min="0"
+                max="10"
+                value="0"
+              >
+
+            </div>
+
+
+            <div class="slider-row">
+
+              <label>
+
+                Attendance Rate (%)
+
+                <span
+                  class="slider-val"
+                  id="attend-val"
+                >
+                  0%
+                </span>
+
+              </label>
+
+              <input
+                type="range"
+                class="slider"
+                id="attend-slider"
+                min="0"
+                max="100"
+                value="0"
+              >
+
+            </div>
+
+
+            <div class="slider-row">
+
+              <label>
+
+                Assignment Completion (%)
+
+                <span
+                  class="slider-val"
+                  id="assign-val"
+                >
+                  0%
+                </span>
+
+              </label>
+
+              <input
+                type="range"
+                class="slider"
+                id="assign-slider"
+                min="0"
+                max="100"
+                value="0"
+              >
+
+            </div>
+
+
+            <div class="slider-row">
+
+              <label>
+
+                Weekly Practice Tests
+
+                <span
+                  class="slider-val"
+                  id="test-val"
+                >
+                  0
+                </span>
+
+              </label>
+
+              <input
+                type="range"
+                class="slider"
+                id="test-slider"
+                min="0"
+                max="8"
+                value="0"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- GOAL -->
+
+        <div class="card">
+
+          <div class="card-header">
+
+            <h3 class="card-title">
+              Target Goal Predictor
+            </h3>
+
+          </div>
+
+
+          <div class="goal-input-group">
+
+            <label class="goal-label">
+              Target Overall Grade Score (%)
+            </label>
+
+
+            <div class="goal-input-row">
+
+              <input
+                type="number"
+                class="goal-input"
+                id="goal-input"
+                value="85"
+                min="50"
+                max="100"
+              >
+
+
+              <button
+                class="btn-primary"
+                id="calc-goal-btn"
+              >
+                Calculate Requirements
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="goal-result"
+            id="goal-result"
+          >
+
+            <div
+              style="
+                font-size:12px;
+                color:var(--text-3);
+                text-align:center;
+                padding:12px;
+              "
+            >
+
+              Enter a target score to calculate required study discipline.
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- WHAT IF RESULT -->
+
+      <div
+        class="whatif-result-card"
+        style="
+          margin-top:20px;
+          padding:15px;
+          background:rgba(255,255,255,.05);
+          border-radius:8px;
+          text-align:center;
+        "
+      >
+
+        <h4
+          style="
+            margin:0;
+            color:#a0aec0;
+          "
+        >
+          Simulated Performance
+        </h4>
+
+
+        <div
+          style="
+            font-size:2.2rem;
+            font-weight:bold;
+            color:#6366f1;
+            margin:8px 0;
+          "
+        >
+
+          <span id="simPredictedScore">
+            --
+          </span>%
+
+        </div>
+
+
+        <div
+          style="
+            display:flex;
+            justify-content:center;
+            gap:15px;
+            font-weight:600;
+          "
+        >
+
+          <span
+            id="simPredictedGrade"
+            style="
+              background:#3b82f6;
+              padding:4px 12px;
+              border-radius:12px;
+            "
+          >
+            Grade: --
+          </span>
+
+
+          <span
+            id="simRiskLevel"
+            style="
+              background:#10b981;
+              padding:4px 12px;
+              border-radius:12px;
+            "
+          >
+            Low Risk
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- RECOMMENDATIONS -->
+
+      <div class="two-col-grid">
+
+        <div class="card">
+
+          <div class="card-header">
+
+            <h3 class="card-title">
+              Priority Focus Areas
+            </h3>
+
+          </div>
+
+          <div
+            class="focus-list"
+            id="focus-areas-list"
+          >
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-header">
+
+            <h3 class="card-title">
+              AI Prescriptive Recommendations
+            </h3>
+
+          </div>
+
+          <div id="rec-grid">
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         PAGE 2 — STUDENTS
+         ======================================================= -->
+
+    <div
+      class="page"
+      id="page-students"
+    >
+
+      <div class="page-header">
+
+        <div>
+
+          <h1 class="page-title">
+            Student Roster Directory
+          </h1>
+
+          <p class="page-subtitle">
+            Batch performance metrics and individual profile selection
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <table class="student-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Student Name
+              </th>
+
+              <th>
+                Roll No
+              </th>
+
+              <th>
+                Predicted Score
+              </th>
+
+              <th>
+                Attendance
+              </th>
+
+              <th>
+                Risk Level
+              </th>
+
+              <th>
+                Grade
+              </th>
+
+              <th>
+                Action
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="student-table-body">
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         PAGE 3 — REPORTS
+         ======================================================= -->
+
+    <div
+      class="page"
+      id="page-reports"
+    >
+
+      <div class="page-header">
+
+        <div>
+
+          <h1 class="page-title">
+            Generated Academic Audits
+          </h1>
+
+          <p class="page-subtitle">
+            Historical PDF reports and performance exports
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <table class="student-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Report ID
+              </th>
+
+              <th>
+                Student
+              </th>
+
+              <th>
+                Generated Date
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Download
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="reports-table-body">
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         PAGE 4 — SETTINGS
+         ======================================================= -->
+
+    <div
+      class="page"
+      id="page-settings"
+    >
+
+      <div class="page-header">
+
+        <div>
+
+          <h1 class="page-title">
+            Student Profile Settings
+          </h1>
+
+          <p class="page-subtitle">
+            Update account details and preferences
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="card"
+        style="max-width:600px;"
+      >
+
+        <form
+          class="settings-form"
+          id="profile-settings-form"
+        >
+
+
+          <div class="form-group">
+
+            <label>
+              Full Name
+            </label>
+
+            <input
+              type="text"
+              class="form-input"
+              id="setting-name"
+              required
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Roll Number
+            </label>
+
+            <input
+              type="text"
+              class="form-input"
+              id="setting-roll"
+              required
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Department / Section
+            </label>
+
+            <input
+              type="text"
+              class="form-input"
+              id="setting-dept"
+              required
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Email Address
+            </label>
+
+            <input
+              type="email"
+              class="form-input"
+              id="setting-email"
+              required
+            >
+
+          </div>
+
+
+          <div style="margin-top:10px;">
+
+            <button
+              type="submit"
+              class="btn-primary"
+            >
+              Save Changes
+            </button>
+
+          </div>
+
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- =========================================================
+       FLOATING AI ASSISTANT
+       ========================================================= -->
+
+  <button
+    class="ai-chat-toggle"
+    id="ai-chat-toggle"
+  >
+
+    <svg
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+      />
+
+    </svg>
+
+    EduPredict Assistant
+
+  </button>
+
+
+  <div
+    class="ai-chat-modal hidden"
+    id="ai-chat-modal"
+  >
+
+    <div class="chat-header">
+
+      <div class="chat-header-title">
+
+        <span>
+          ✨ EduPredict AI Assistant
+        </span>
+
+      </div>
+
+      <button id="chat-close-btn">
+        &times;
+      </button>
+
+    </div>
+
+
+    <div
+      class="chat-body"
+      id="chat-body"
+    >
+
+      <div class="chat-msg bot">
+
+        Hello! I'm your academic assistant.
+        How can I help analyze your performance today?
+
+      </div>
+
+
+      <div
+        class="quick-actions"
+        id="quick-actions"
+      >
+
+        <button data-query="Predict my final grade score">
+          📊 Predict my score
+        </button>
+
+        <button data-query="What is my weak subject?">
+          ⚠️ What is my weak subject?
+        </button>
+
+        <button data-query="How to improve my attendance?">
+          📅 Check my attendance status
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="chat-footer">
+
+      <input
+        type="text"
+        id="chat-input"
+        placeholder="Ask about predictions, study habits..."
+      >
+
+      <button id="chat-send-btn">
+        Send
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       YOUR EXISTING APP.JS
+       ========================================================= -->
+
+  <script src="app.js"></script>
+<script>
+/* =========================================================
+   EDUPREDICT — FIXED WHAT-IF + TARGET GOAL CALCULATIONS
+   ========================================================= */
+document.addEventListener("DOMContentLoaded", function () {
+    const studySlider  = document.getElementById("study-slider");
+    const attendSlider = document.getElementById("attend-slider");
+    const assignSlider = document.getElementById("assign-slider");
+    const testSlider   = document.getElementById("test-slider");
+
+    const studyVal  = document.getElementById("study-val");
+    const attendVal = document.getElementById("attend-val");
+    const assignVal = document.getElementById("assign-val");
+    const testVal   = document.getElementById("test-val");
+
+    const scoreEl = document.getElementById("simPredictedScore");
+    const gradeEl = document.getElementById("simPredictedGrade");
+    const riskEl  = document.getElementById("simRiskLevel");
+
+    const goalInput = document.getElementById("goal-input");
+    const goalBtn   = document.getElementById("calc-goal-btn");
+    const goalResult = document.getElementById("goal-result");
+
+    if (!studySlider || !attendSlider || !assignSlider ||
+        !testSlider || !scoreEl || !gradeEl || !riskEl) {
+        return;
+    }
+
+    /*
+      All four inputs are converted to a common 0–100 scale.
+
+      Weighting:
+        Study hours       35%
+        Attendance        25%
+        Assignments       20%
+        Practice tests    20%
+
+      This makes the calculation consistent and prevents values such
+      as "12 hours/day" from being produced by a negative/zero target.
+    */
+    function calculateSimulation() {
+        const study = Number(studySlider.value);
+        const attendance = Number(attendSlider.value);
+        const assignments = Number(assignSlider.value);
+        const tests = Number(testSlider.value);
+
+        const studyScore = (study / 10) * 100;
+        const testScore = (tests / 8) * 100;
+
+        let score =
+            (studyScore * 0.35) +
+            (attendance * 0.25) +
+            (assignments * 0.20) +
+            (testScore * 0.20);
+
+        score = Math.max(0, Math.min(100, score));
+        score = Math.round(score * 10) / 10;
+
+        studyVal.textContent = `${study}h`;
+        attendVal.textContent = `${attendance}%`;
+        assignVal.textContent = `${assignments}%`;
+        testVal.textContent = `${tests}`;
+
+        scoreEl.textContent = Number.isInteger(score) ? score : score.toFixed(1);
+        gradeEl.textContent = `Grade: ${getGrade(score)}`;
+
+        const risk = getRisk(score);
+        riskEl.textContent = risk.text;
+        riskEl.style.background = risk.background;
+    }
+
+    function getGrade(score) {
+        if (score >= 90) return "A+";
+        if (score >= 80) return "A";
+        if (score >= 70) return "B+";
+        if (score >= 60) return "B";
+        if (score >= 50) return "C";
+        if (score >= 40) return "D";
+        return "F";
+    }
+
+    function getRisk(score) {
+        if (score >= 75) {
+            return { text: "Low Risk", background: "#10b981" };
+        }
+        if (score >= 50) {
+            return { text: "Medium Risk", background: "#f59e0b" };
+        }
+        return { text: "High Risk", background: "#ef4444" };
+    }
+
+    /*
+      Target calculation:
+      Solve the same weighted formula for daily study hours.
+
+      target =
+        (studyHours/10 * 100 * 0.35)
+        + attendance*0.25
+        + assignment*0.20
+        + tests/8*100*0.20
+
+      Therefore:
+      studyHours =
+        (target - nonStudyContribution) / 3.5
+
+      Result is capped at 10h/day because the simulator itself has
+      a maximum of 10 hours/day.
+    */
+    function calculateGoal() {
+        if (!goalInput || !goalResult) return;
+
+        const target = Number(goalInput.value);
+
+        if (!Number.isFinite(target) || target < 1 || target > 100) {
+            goalResult.innerHTML = `
+                <div style="
+                    font-size:13px;
+                    color:#f87171;
+                    text-align:center;
+                    padding:18px;
+                    font-weight:700;
+                ">
+                    Enter a target score between 1% and 100%.
+                </div>
+            `;
+            return;
+        }
+
+        const attendance = Number(attendSlider.value);
+        const assignments = Number(assignSlider.value);
+        const tests = Number(testSlider.value);
+        const currentStudy = Number(studySlider.value);
+
+        const nonStudyContribution =
+            (attendance * 0.25) +
+            (assignments * 0.20) +
+            ((tests / 8) * 100 * 0.20);
+
+        const requiredStudy =
+            (target - nonStudyContribution) / 3.5;
+
+        if (requiredStudy <= 0) {
+            goalResult.innerHTML = `
+                <div style="text-align:center;padding:18px;">
+                    <div style="font-size:16px;font-weight:800;">
+                        🎯 Target already achievable
+                    </div>
+                    <div style="
+                        margin-top:8px;
+                        color:var(--text-3);
+                        font-size:12px;
+                    ">
+                        Your current attendance, assignments and practice
+                        tests already meet or exceed this target.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        if (requiredStudy > 10) {
+            goalResult.innerHTML = `
+                <div style="text-align:center;padding:18px;">
+                    <div style="font-size:16px;font-weight:800;">
+                        📚 Target requires more than 10 hrs/day
+                    </div>
+                    <div style="
+                        margin-top:8px;
+                        color:var(--text-3);
+                        font-size:12px;
+                        line-height:1.6;
+                    ">
+                        With the current attendance, assignment completion
+                        and practice-test values, this target cannot be
+                        reached within the simulator's 1–10 hrs/day range.
+                        Improve those factors as well.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        const required = Math.min(10, Math.max(1, requiredStudy));
+        const additional = Math.max(0, required - currentStudy);
+
+        const requiredText = required.toFixed(1).replace(".0", "");
+        const additionalText = additional.toFixed(1).replace(".0", "");
+
+        goalResult.innerHTML = `
+            <div style="
+                display:grid;
+                gap:12px;
+                text-align:center;
+                padding:14px;
+            ">
+                <div>
+                    <div style="font-size:12px;font-weight:800;">
+                        📚 Target Daily Study:
+                    </div>
+                    <div style="
+                        display:inline-block;
+                        margin-top:7px;
+                        padding:5px 12px;
+                        border-radius:999px;
+                        background:rgba(99,102,241,.15);
+                        color:#818cf8;
+                        font-weight:800;
+                    ">
+                        ${requiredText} hrs/day
+                        (+${additionalText}h)
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:12px;font-weight:800;">
+                        📅 Required Attendance:
+                    </div>
+                    <div style="
+                        display:inline-block;
+                        margin-top:7px;
+                        padding:5px 12px;
+                        border-radius:999px;
+                        background:rgba(99,102,241,.15);
+                        color:#818cf8;
+                        font-weight:800;
+                    ">
+                        ${Math.max(75, Math.min(95, Math.ceil(target * 0.95)))}%
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:12px;font-weight:800;">
+                        📝 Practice Tests:
+                    </div>
+                    <div style="
+                        display:inline-block;
+                        margin-top:7px;
+                        padding:5px 12px;
+                        border-radius:999px;
+                        background:rgba(16,185,129,.15);
+                        color:#10b981;
+                        font-weight:800;
+                    ">
+                        ${Math.min(8, Math.max(2, Math.ceil(target / 10)))}
+                        / week
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    [studySlider, attendSlider, assignSlider, testSlider].forEach(function (slider) {
+        slider.addEventListener("input", calculateSimulation);
+        slider.addEventListener("change", calculateSimulation);
+    });
+
+    if (goalBtn) {
+        goalBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            calculateGoal();
+        });
+    }
+
+    if (goalInput) {
+        goalInput.addEventListener("input", function () {
+            if (goalInput.value !== "") {
+                calculateGoal();
+            }
+        });
+    }
+
+    // Correct initial display and calculation.
+    calculateSimulation();
+
+    // Do not calculate a goal automatically from an invalid/empty value.
+    if (goalInput && Number(goalInput.value) >= 1 && Number(goalInput.value) <= 100) {
+        calculateGoal();
+    }
+});
+</script>
+
+
+
+  <!-- =========================================================
+       GUARANTEED NOTIFICATION SYSTEM
+       This runs after app.js so the notification button
+       definitely works.
+       ========================================================= -->
+
+  <script>
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      function () {
+
+        const originalButton =
+          document.getElementById('notif-btn');
+
+        const panel =
+          document.getElementById('notif-panel');
+
+        const overlay =
+          document.getElementById('notif-overlay');
+
+        const list =
+          document.getElementById('notif-list');
+
+        const markRead =
+          document.getElementById('mark-all-read');
+
+        const badge =
+          document.querySelector('.notif-dot');
+
+
+        if (
+          !originalButton ||
+          !panel ||
+          !list
+        ) {
+
+          console.error(
+            'Notification elements were not found.'
+          );
+
+          return;
+
+        }
+
+
+        /*
+         * Replace the original button.
+         *
+         * This removes any old notification click
+         * handlers from app.js and gives us one
+         * guaranteed working handler.
+         */
+
+        const button =
+          originalButton.cloneNode(true);
+
+        originalButton.replaceWith(button);
+
+
+        let notifications = [];
+
+
+        function getStudentName() {
+
+          const profileName =
+            document.querySelector(
+              '.profile-name'
+            );
+
+
+          if (
+            profileName &&
+            profileName.textContent.trim() &&
+            profileName.textContent.trim() !==
+              'Student Profile'
+          ) {
+
+            return profileName.textContent.trim();
+
+          }
+
+
+          const select =
+            document.getElementById(
+              'student-select'
+            );
+
+
+          if (
+            select &&
+            select.options.length > 0
+          ) {
+
+            const text =
+              select.options[
+                select.selectedIndex
+              ].textContent.trim();
+
+
+            if (
+              text &&
+              !text
+                .toLowerCase()
+                .includes('loading')
+            ) {
+
+              /*
+               * If the option is:
+               * Jay Legha — IT23001
+               *
+               * only take the name.
+               */
+
+              return text
+                .split('—')[0]
+                .split('-')[0]
+                .trim();
+
+            }
+
+          }
+
+
+          return 'Student';
+
+        }
+
+
+        function createNotifications() {
+
+          const name =
+            getStudentName();
+
+
+          return [
+
+            {
+              id: 1,
+
+              icon: '⚠️',
+
+              title:
+                'Attendance Alert',
+
+              message:
+                `${name}, please attend your upcoming lectures regularly to maintain your attendance.`,
+
+              type:
+                'warning',
+
+              unread:
+                true
+
+            },
+
+
+            {
+              id: 2,
+
+              icon: '📈',
+
+              title:
+                'Performance Update',
+
+              message:
+                `Good progress, ${name}! Your latest academic performance has been updated on the dashboard.`,
+
+              type:
+                'success',
+
+              unread:
+                true
+
+            },
+
+
+            {
+              id: 3,
+
+              icon: '📝',
+
+              title:
+                'Assignment Reminder',
+
+              message:
+                `${name}, remember to complete and submit your pending assignments before the deadline.`,
+
+              type:
+                'warning',
+
+              unread:
+                true
+
+            },
+
+
+            {
+              id: 4,
+
+              icon: '🎯',
+
+              title:
+                'Study Goal Reminder',
+
+              message:
+                `${name}, complete your planned practice tests this week to stay on track with your academic goals.`,
+
+              type:
+                'info',
+
+              unread:
+                true
+
+            },
+
+
+            {
+              id: 5,
+
+              icon: '📚',
+
+              title:
+                'Study Recommendation',
+
+              message:
+                `${name}, spend additional time revising your weaker subjects and solving practice questions.`,
+
+              type:
+                'info',
+
+              unread:
+                true
+
+            },
+
+
+            {
+              id: 6,
+
+              icon: '🏆',
+
+              title:
+                'Academic Progress',
+
+              message:
+                `Keep going, ${name}! Consistent study and regular revision can help improve your academic performance.`,
+
+              type:
+                'success',
+
+              unread:
+                true
+
+            },
+
+
+            {
+              id: 7,
+
+              icon: '🗓️',
+
+              title:
+                'Weekly Review Ready',
+
+              message:
+                `${name}, your weekly academic review is ready. Check your dashboard for your latest performance.`,
+
+              type:
+                'info',
+
+              unread:
+                true
+
+            }
+
+          ];
+
+        }
+
+
+        function renderNotifications() {
+
+          list.innerHTML = '';
+
+
+          if (
+            notifications.length === 0
+          ) {
+
+            list.innerHTML = `
+
+              <div
+                style="
+                  padding:40px 20px;
+                  text-align:center;
+                  color:#94a3b8;
+                "
+              >
+
+                <div
+                  style="
+                    font-size:35px;
+                    margin-bottom:10px;
+                  "
+                >
+                  🔔
+                </div>
+
+                <div
+                  style="
+                    font-size:14px;
+                    font-weight:700;
+                  "
+                >
+                  No notifications
+                </div>
+
+                <div
+                  style="
+                    font-size:12px;
+                    margin-top:5px;
+                  "
+                >
+                  You're all caught up!
+                </div>
+
+              </div>
+
+            `;
+
+            return;
+
+          }
+
+
+          notifications.forEach(
+            function (notification) {
+
+
+              const item =
+                document.createElement(
+                  'div'
+                );
+
+
+              item.className =
+                'edupredict-notification';
+
+
+              if (
+                notification.unread
+              ) {
+
+                item.classList.add(
+                  'unread'
+                );
+
+              }
+
+
+              if (
+                notification.type ===
+                'warning'
+              ) {
+
+                item.style.borderLeft =
+                  '4px solid #f59e0b';
+
+              }
+
+              else if (
+                notification.type ===
+                'success'
+              ) {
+
+                item.style.borderLeft =
+                  '4px solid #10b981';
+
+              }
+
+              else {
+
+                item.style.borderLeft =
+                  '4px solid #6366f1';
+
+              }
+
+
+              item.innerHTML = `
+
+                <div
+                  class="notification-icon"
+                >
+                  ${notification.icon}
+                </div>
+
+
+                <div
+                  class="notification-content"
+                >
+
+                  <div
+                    class="notification-title-row"
+                  >
+
+                    <span
+                      class="notification-title"
+                    >
+                      ${notification.title}
+                    </span>
+
+
+                    ${
+                      notification.unread
+                        ? `
+                          <span
+                            class="notification-unread-dot"
+                          >
+                          </span>
+                        `
+                        : ''
+                    }
+
+                  </div>
+
+
+                  <p
+                    class="notification-message"
+                  >
+                    ${notification.message}
+                  </p>
+
+
+                  ${
+                    notification.unread
+                      ? `
+                        <span
+                          class="notification-new"
+                        >
+                          NEW
+                        </span>
+                      `
+                      : ''
+                  }
+
+                </div>
+
+              `;
+
+
+              /*
+               * Clicking a notification
+               * marks only that notification
+               * as read.
+               */
+
+              item.addEventListener(
+                'click',
+                function () {
+
+                  notification.unread =
+                    false;
+
+                  renderNotifications();
+
+                }
+              );
+
+
+              list.appendChild(item);
+
+            }
+          );
+
+
+          updateNotificationBadge();
+
+        }
+
+
+        function updateNotificationBadge() {
+
+          if (!badge) return;
+
+
+          const unreadCount =
+            notifications.filter(
+              function (notification) {
+
+                return notification.unread;
+
+              }
+            ).length;
+
+
+          if (
+            unreadCount > 0
+          ) {
+
+            badge.style.display =
+              'flex';
+
+
+            badge.textContent =
+              unreadCount > 9
+                ? '9+'
+                : unreadCount;
+
+          }
+
+          else {
+
+            badge.style.display =
+              'none';
+
+          }
+
+        }
+
+
+        function openNotifications() {
+
+          /*
+           * Re-create notifications each time
+           * if they haven't been created.
+           */
+
+          if (
+            notifications.length === 0
+          ) {
+
+            notifications =
+              createNotifications();
+
+            renderNotifications();
+
+          }
+
+
+          panel.style.display =
+            'block';
+
+
+          if (overlay) {
+
+            overlay.style.display =
+              'block';
+
+          }
+
+        }
+
+
+        function closeNotifications() {
+
+          panel.style.display =
+            'none';
+
+
+          if (overlay) {
+
+            overlay.style.display =
+              'none';
+
+          }
+
+        }
+
+
+        /*
+         * BELL CLICK
+         */
+
+        button.addEventListener(
+          'click',
+          function (event) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            if (
+              panel.style.display ===
+              'block'
+            ) {
+
+              closeNotifications();
+
+            }
+
+            else {
+
+              openNotifications();
+
+            }
+
+          }
+        );
+
+
+        /*
+         * OVERLAY CLICK
+         */
+
+        if (overlay) {
+
+          overlay.addEventListener(
+            'click',
+            function () {
+
+              closeNotifications();
+
+            }
+          );
+
+        }
+
+
+        /*
+         * MARK ALL AS READ
+         */
+
+        if (markRead) {
+
+          markRead.addEventListener(
+            'click',
+            function (event) {
+
+              event.preventDefault();
+
+              event.stopPropagation();
+
+
+              notifications =
+                notifications.map(
+                  function (
+                    notification
+                  ) {
+
+                    return {
+
+                      ...notification,
+
+                      unread:
+                        false
+
+                    };
+
+                  }
+                );
+
+
+              renderNotifications();
+
+            }
+          );
+
+        }
+
+
+        /*
+         * ESCAPE KEY
+         */
+
+        document.addEventListener(
+          'keydown',
+          function (event) {
+
+            if (
+              event.key ===
+              'Escape'
+            ) {
+
+              closeNotifications();
+
+            }
+
+          }
+        );
+
+
+        /*
+         * Create notifications immediately
+         * so the red "7" badge appears.
+         */
+
+        notifications =
+          createNotifications();
+
+
+        renderNotifications();
+
+      }
+
+    );
+
+  </script>
+
+</body>
+
+</html>
+
+  

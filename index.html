@@ -1,0 +1,521 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPredict AI — Login</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* LEFT SIDE */
+        .login-left {
+            width: 46%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+        }
+
+        .login-content {
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: 900;
+            color: #111827;
+            margin-bottom: 55px;
+        }
+
+        .logo span {
+            color: #6366f1;
+        }
+
+        .login-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 35px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .login-input {
+            width: 100%;
+            height: 52px;
+            padding: 0 16px;
+            border: 1px solid #dbe1ea;
+            border-radius: 10px;
+            outline: none;
+            font-size: 14px;
+            color: #111827;
+            transition: 0.2s;
+        }
+
+        .login-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+
+        .password-input {
+            padding-right: 50px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .login-options {
+            display: flex;
+            justify-content: flex-end;
+            margin: 5px 0 25px;
+        }
+
+        .forgot-password {
+            color: #6366f1;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .login-button {
+            width: 100%;
+            height: 52px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .login-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.25);
+        }
+
+        .login-footer {
+            margin-top: 35px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        /* RIGHT SIDE */
+        .login-right {
+            width: 54%;
+            background: linear-gradient(135deg, #111827, #312e81);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-right-content {
+            position: relative;
+            z-index: 2;
+            max-width: 650px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        .login-right h2 {
+            font-size: 48px;
+            line-height: 1.1;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .login-right h2 span {
+            color: #818cf8;
+        }
+
+        .right-description {
+            color: #cbd5e1;
+            font-size: 15px;
+            line-height: 1.7;
+            max-width: 580px;
+            margin-bottom: 35px;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .preview-card {
+            padding: 22px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preview-label {
+            font-size: 11px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        .preview-value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .preview-small {
+            margin-top: 5px;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(99,102,241,0.12);
+        }
+
+        .circle.one {
+            width: 350px;
+            height: 350px;
+            right: -120px;
+            top: -120px;
+        }
+
+        .circle.two {
+            width: 250px;
+            height: 250px;
+            left: -100px;
+            bottom: -100px;
+        }
+
+        @media (max-width: 900px) {
+            .login-left {
+                width: 100%;
+            }
+
+            .login-right {
+                display: none;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .login-left {
+                padding: 30px 22px;
+            }
+
+            .login-title {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-screen">
+
+    <!-- LEFT -->
+    <div class="login-left">
+        <div class="login-content">
+
+            <div class="logo">
+                EduPredict <span>AI</span>
+            </div>
+
+            <h1 class="login-title">
+                Welcome Back
+            </h1>
+
+            <p class="login-subtitle">
+                Sign in to access your academic performance dashboard.
+            </p>
+
+            <form id="loginForm">
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Academic Email or Roll Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="email"
+                        class="login-input"
+                        placeholder="Enter your email or roll number"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Password
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <input
+                            type="password"
+                            id="password"
+                            class="login-input password-input"
+                            placeholder="Enter your password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            id="passwordToggle"
+                        >
+                            👁️
+                        </button>
+
+                    </div>
+                </div>
+
+                <div class="login-options">
+                    <a href="#" class="forgot-password" id="forgotPassword">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <button
+                    type="submit"
+                    class="login-button"
+                >
+                    Sign In to Portal
+                </button>
+
+            </form>
+
+            <div class="login-footer">
+                © 2026 EduPredict AI System • G.H. Raisoni College of Engineering
+            </div>
+
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="login-right">
+
+        <div class="circle one"></div>
+        <div class="circle two"></div>
+
+        <div class="login-right-content">
+
+            <div class="badge">
+                ✨ Predictive Analytics Engine v2.4
+            </div>
+
+            <h2>
+                Real-time Academic
+                <span>Intelligence</span>
+            </h2>
+
+            <p class="right-description">
+                Leverage academic analytics to forecast grade trajectories,
+                identify performance risks, monitor attendance, and receive
+                personalized study recommendations.
+            </p>
+
+            <div class="preview-grid">
+
+                <div class="preview-card">
+
+                    <div class="preview-label">
+                        Prediction Accuracy
+                    </div>
+
+                    <div class="preview-value">
+                        94.2%
+                    </div>
+
+                    <div class="preview-small">
+                        Model Precision
+                    </div>
+
+                </div>
+
+                <div class="preview-card">
+
+                    <div class="preview-label">
+                        Active Monitoring
+                    </div>
+
+                    <div class="preview-value">
+                        100+
+                    </div>
+
+                    <div class="preview-small">
+                        Student Profiles Synced
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    /* =========================================
+       PASSWORD SHOW / HIDE
+    ========================================= */
+
+    document
+        .getElementById("passwordToggle")
+        .addEventListener("click", function () {
+
+            const password =
+                document.getElementById("password");
+
+            if (password.type === "password") {
+
+                password.type = "text";
+                this.textContent = "🔒";
+
+            } else {
+
+                password.type = "password";
+                this.textContent = "👁️";
+
+            }
+
+        });
+
+
+    /* =========================================
+       FORGOT PASSWORD
+    ========================================= */
+
+    document
+        .getElementById("forgotPassword")
+        .addEventListener("click", function (event) {
+
+            event.preventDefault();
+
+            alert(
+                "Please contact your college administrator to reset your password."
+            );
+
+        });
+
+
+    /* =========================================
+       LOGIN → PROJECT.HTML
+    ========================================= */
+
+    document
+        .getElementById("loginForm")
+        .addEventListener("submit", function (event) {
+
+            event.preventDefault();
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const password =
+                document.getElementById("password").value.trim();
+
+
+            /* Check that both fields are filled */
+
+            if (!email || !password) {
+
+                alert(
+                    "Please enter your email/roll number and password."
+                );
+
+                return;
+
+            }
+
+
+            /* =========================================
+               REDIRECT TO PROJECT.HTML
+               
+               login.html and project.html
+               must be in the same folder.
+            ========================================= */
+
+            window.location.href = "project.html";
+
+        });
+
+</script>
+
+</body>
+</html>
+```
+
+**Important:** save this login page as something like `login.html`, and make sure `project.html` is in the **same folder**. After entering anything in both fields and clicking **Sign In to Portal**, it will redirect to `project.html`.
